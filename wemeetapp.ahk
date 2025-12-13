@@ -21,36 +21,22 @@ FloatWindowIDs := []
         return
     }
 
-    ; 查找并隐藏所有浮动窗口
-    if WinExist("ahk_exe WeMeetApp.exe") {
-        ids := WinGetList("ahk_exe WeMeetApp.exe")
-        hideCount := 0
+    ; 查找并隐藏指定类名的浮动窗口
+    targetWinID := WinGetID("ahk_class Qt680QWindowToolSaveBits ahk_exe wemeetapp.exe")
 
-        for this_id in ids {
-            try {
-                WinGetPos(&x, &y, &w, &h, "ahk_id " this_id)
-
-                ; 浮动窗口通常较小且置顶
-                if (w < 300 || h < 150) {
-                    ExStyle := WinGetExStyle("ahk_id " this_id)
-                    if (ExStyle & 0x8) {  ; WS_EX_TOPMOST
-                        style := WinGetStyle("ahk_id " this_id)
-                        if (style & 0x10000000) {  ; WS_VISIBLE
-                            WinHide("ahk_id " this_id)
-                            FloatWindowIDs.Push(this_id)
-                            hideCount++
-                        }
-                    }
-                }
-            }
+    if (targetWinID) {
+        try {
+            WinHide("ahk_id " targetWinID)
+            FloatWindowIDs.Push(targetWinID)
+            ToolTip("已隐藏WeMeetApp置顶浮窗")
         }
-
-        if (hideCount > 0) {
-            ToolTip("已隐藏所有WeMeetApp置顶浮窗")
+        catch {
+            ToolTip("隐藏窗口失败！")
         }
-        else {
-            ToolTip("未找到WeMeetApp置顶浮窗，请检查WeMeetApp是否开启！")
-        }
+        SetTimer(() => ToolTip(), -2000)
+    }
+    else {
+        ToolTip("未找到指定窗口类，请检查腾讯会议是否开启！")
         SetTimer(() => ToolTip(), -2000)
     }
 }
